@@ -702,6 +702,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+  smoothTime: 0.05
+  afterReleaseDistanceMultiplier: 0.2
+  afterReleaseTime: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
