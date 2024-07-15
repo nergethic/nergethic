@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>OneOf.SourceGenerator</id>
+    <version>3.0.271</version>
+    <title>OneOf - Easy Discriminated Unions for c#</title>
+    <authors>Harry McIntyre, Damian Romanowski</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/mcintyre321/OneOf/</projectUrl>
+    <description>This source generator automaticly implements OneOfBase hierarchies</description>
+    <copyright>Harry McIntyre</copyright>
+    <tags>discriminated unions, return type, match switch, generator, source generator</tags>
+    <repository type="git" url="https://github.com/mcintyre321/OneOf.git" commit="6e02dbe75d0f20f198c640d4c04190a85c5ac9e6" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>
