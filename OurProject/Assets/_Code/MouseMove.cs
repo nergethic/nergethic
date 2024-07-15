@@ -93,16 +93,22 @@ public class MouseMove : MonoBehaviour {
         rootTransform.localScale = originalScale;
         rootTransform.localRotation = originalRotation;
 
+        float randomAngle = GetRandomRotationAngle();
+
+        // Start new tweens for scale and rotation
+        scaleTween = rootTransform.DOScale(originalScale * 1.12f, 0.2f).SetLoops(2, LoopType.Yoyo);
+        rotateTween = rootTransform.DORotateQuaternion(originalRotation * Quaternion.Euler(0, 0, randomAngle), 0.2f)
+                               .SetLoops(2, LoopType.Yoyo)
+                               .SetEase(Ease.InOutSine);
+    }
+
+    float GetRandomRotationAngle() {
         float randomRotationAngle = Random.Range(-10f, 10f);
         if (randomRotationAngle > 6f)
             randomRotationAngle = 10f;
         else if (randomRotationAngle < -6f)
             randomRotationAngle = -10f;
 
-        // Start new tweens for scale and rotation
-        scaleTween = rootTransform.DOScale(originalScale * 1.12f, 0.2f).SetLoops(2, LoopType.Yoyo);
-        rotateTween = rootTransform.DORotateQuaternion(originalRotation * Quaternion.Euler(0, 0, randomRotationAngle), 0.2f)
-                               .SetLoops(2, LoopType.Yoyo)
-                               .SetEase(Ease.InOutSine);
+        return randomRotationAngle;
     }
 }
