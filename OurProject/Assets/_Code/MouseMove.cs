@@ -2,12 +2,12 @@ using DG.Tweening;
 using UnityEngine;
 
 public class MouseMove : MonoBehaviour {
-    Vector3 handleToOriginVector;
     [SerializeField] bool isDragging;
     [SerializeField] float smoothTime = 0.05f; // Smoothing factor
     [SerializeField] float afterReleaseDistanceMultiplier = 1.5f; // How far to continue based on the current speed
     [SerializeField] float afterReleaseTime = 0.5f;
 
+    Vector3 fromCursorToObject;
     Vector3 velocity = Vector3.zero; // Needed for smooth damping
     Vector3 targetPosition;
     bool shouldUpdatePosition;
@@ -28,9 +28,12 @@ public class MouseMove : MonoBehaviour {
 
         originalScale = rootTransform.localScale;
         originalRotation = rootTransform.localRotation;
+
+        Tween scaleTween = null;
+        Tween rotateTween = null;
     }
 
-    public void Update() {
+    public void LateUpdate() {
         // speed += (target - current) * deltaTime * stiffness; speed *= pow(1 - damping, deltaTime); current += speed * deltaTime;
         if (!shouldUpdatePosition || !isDragging)
             return;
@@ -39,7 +42,8 @@ public class MouseMove : MonoBehaviour {
     }
 
     void OnMouseDown() {
-        handleToOriginVector = rootTransform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        fromCursorToObject = rootTransform.position - cursorPos;
         isDragging = true;
 
         StartInteractiveEffects();
@@ -49,8 +53,8 @@ public class MouseMove : MonoBehaviour {
         if (!isDragging)
             return;
 
-        // Vector3 cursorPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) + handleToOriginVector;
+        var cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        targetPosition = cursorPos + fromCursorToObject;
 
         var currentValue = rootTransform.position;
         newValue = Vector3.SmoothDamp(currentValue, targetPosition, ref velocity, smoothTime);
@@ -68,21 +72,12 @@ public class MouseMove : MonoBehaviour {
 
     void OnMouseUp() {
         isDragging = false;
-
-        // Continue moving with inertia
-        Vector3 extrapolatedTarget = rootTransform.position + lastFrameVelocity * afterReleaseDistanceMultiplier;
-        rootTransform.DOMove(extrapolatedTarget, afterReleaseTime)
-                      .SetEase(Ease.OutCubic) // Easing to simulate deceleration
-                      .OnComplete(() => {
-                          // Update targetPosition to the new position after the move completes
-                          targetPosition = rootTransform.position;
-                          newValue = targetPosition;
-                      });
+        ApplySlowingDown();
     }
 
     void StartInteractiveEffects() {
         // Calculate handleToOriginVector
-        handleToOriginVector = rootTransform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        fromCursorToObject = rootTransform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
         isDragging = true;
 
         // Kill specific tweens if they are active
@@ -93,13 +88,35 @@ public class MouseMove : MonoBehaviour {
         rootTransform.localScale = originalScale;
         rootTransform.localRotation = originalRotation;
 
-        float randomAngle = GetRandomRotationAngle();
+        float randomRotationAngle = GetRandomRotationAngle();
 
         // Start new tweens for scale and rotation
-        scaleTween = rootTransform.DOScale(originalScale * 1.12f, 0.2f).SetLoops(2, LoopType.Yoyo);
-        rotateTween = rootTransform.DORotateQuaternion(originalRotation * Quaternion.Euler(0, 0, randomAngle), 0.2f)
-                               .SetLoops(2, LoopType.Yoyo)
-                               .SetEase(Ease.InOutSine);
+        //scaleTween = rootTransform.DOScale(originalScale * 1.12f, 0.2f).SetLoops(2, LoopType.Yoyo);
+        //rotateTween = rootTransform.DORotateQuaternion(originalRotation * Quaternion.Euler(0, 0, randomRotationAngle), 0.2f)
+            //.SetLoops(2, LoopType.Yoyo)
+            //.SetEase(Ease.InOutSine);
+    }
+
+    void ApplySlowingDown() {
+        bool scaleTweenIsInactive = scaleTween == null || !scaleTween.IsActive() || scaleTween.IsComplete();
+        bool rotateTweenIsInactive = rotateTween == null || !rotateTween.IsActive() || rotateTween.IsComplete();
+
+        if (!scaleTweenIsInactive) {
+            scaleTween?.Kill(true);
+        }
+
+        if (!rotateTweenIsInactive) {
+            rotateTween?.Kill(true);
+        }
+
+        // Continue moving with inertia
+        Vector3 extrapolatedTarget = rootTransform.position + lastFrameVelocity * afterReleaseDistanceMultiplier;
+        rootTransform.DOMove(extrapolatedTarget, afterReleaseTime)
+                      .SetEase(Ease.OutCubic) // Easing to simulate deceleration
+                      .OnComplete(() => {
+                          targetPosition = rootTransform.position;
+                          newValue = targetPosition;
+                      });
     }
 
     float GetRandomRotationAngle() {
