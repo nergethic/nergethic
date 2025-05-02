@@ -10,10 +10,4 @@
     media="(prefers-color-scheme: light)"
     srcset="https://raw.githubusercontent.com/nergethic/nergethic/output/github-contribution-grid-snake.svg"
   />
-
-  <!-- Fallback for browsers that don’t understand <picture> -->
-  <img
-    alt="GitHub contribution graph snake"
-    src="https://raw.githubusercontent.com/nergethic/nergethic/output/github-contribution-grid-snake.svg"
-  />
 </picture>
